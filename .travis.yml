@@ -1,0 +1,49 @@
+language: rust
+matrix:
+  include:
+    # nightly channel (rest api)
+    - rust: nightly
+      # skip the global install step
+      install:
+        - cargo install --debug --force rustfmt-nightly
+      script:
+        - cargo fmt -- --check
+    # TODO: stable channel
+  fast_finish: true
+
+# Caching
+cache:
+  directories:
+    - /home/travis/.cargo
+before_cache:
+  - rm -rf /home/travis/.cargo/registry
+
+services:
+  - docker
+
+# Test components
+before_install:
+  - docker pull target/consensource:build_agent
+  - docker run target/consensource:build_agent
+
+script:
+  - cd cli && cargo test
+  - cd ../common && cargo test
+  - cd ../database && cargo test
+  - cd ../processor && cargo test
+  - cd ../state_delta_subscriber && cargo test
+  - cd ../rest_api && cargo test
+
+# # Lint components
+# before_install:
+#   - docker pull target/consensource:linter
+#   - docker run target/consensource:linter
+#   - cd ../cli && cargo fmt -- --check
+#   - cd ../common && cargo fmt -- --check
+#   - cd ../database && cargo fmt -- --check
+#   - cd ../processor && cargo fmt -- --check
+#   - cd ../state_delta_subscriber && cargo fmt -- --check
+
+#   - docker pull target/consensource:linter-nightly
+#   - docker run target/consensource:linter-nightly
+#   - cd rest_api && cargo fmt -- --check

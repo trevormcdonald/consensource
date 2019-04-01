@@ -1,0 +1,29 @@
+- email: "agent001@example.com"
+  organization:
+      name: "FSC"
+      type: StandardsBody
+      contact:
+          name: John Q. Standards
+          phone_number: 123-456-7890
+          language: en
+      standards:
+          - name: FSC-C
+            version: "1.0"
+            description: |
+                FSC Chain of Custody Certification
+            link: https://ic.fsc.org/en/document-center/id/80
+            approval_date: 2017/04/01
+          - name: FSC-N
+            version: "1.0"
+            description: |
+                Forest Management Certification
+            link: https://ic.fsc.org/file-download.fsc-and-plantations.a-1723.pdf
+            approval_date: 2017/04/01
+- email: "agent002@example.com"
+  organization:
+      name: Rainforest Alliance
+      type: CertifyingBody
+      contact:
+          name: Jane Forest
+          phone_number: 987-654-3210
+          language: en

@@ -1,0 +1,28 @@
+[package]
+name = "creg"
+version = "0.1.0"
+authors = ["Target"]
+
+[[bin]]
+name = "creg"
+path = "src/main.rs"
+
+cargo-features = ["rename-dependency"]
+
+[dependencies]
+clap = "2"
+futures = "0.1"
+hyper = "0.11"
+protobuf = "2"
+rust-crypto = "0.2"
+sawtooth-sdk = "0.1"
+tokio-core = "0.1"
+users = "0.6"
+yaml-rust = "0.4"
+serde = "1.0"
+serde_json = "1.0"
+serde_yaml = "0.8"
+serde_derive = "1.0"
+common = { path = "../common"}
+uuid = { version = "0.6", features = ["serde", "v4"] }
+chrono = "0.4"
