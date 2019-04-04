@@ -1,0 +1,19 @@
+# Rust artifacts
+**/target/
+**/**/*.rs.bk
+**/Cargo.lock
+**/build
+**/proto
+
+# NPM artifacts
+client/node_modules
+client/package-lock.json
+client/public/js
+client/src/compiled_protobufs.json
+
+# Python artifacts
+**/**/__pycache__
+**/**/protobuf
+
+rest_api/api_secrets.env
+
