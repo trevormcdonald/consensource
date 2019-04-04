@@ -45,7 +45,8 @@ fn main() {
         (@arg dbuser: default_value("cert-registry") --dbuser +takes_value
             "the authorized user of the database")
         (@arg dbpass: default_value("cert-registry") --dbpass +takes_value
-            "the authorized user's password for database access")).get_matches();
+            "the authorized user's password for database access"))
+    .get_matches();
 
     let _logger = match matches.occurrences_of("verbose") {
         1 => simple_logger::init_with_level(LogLevel::Info),
@@ -76,7 +77,8 @@ fn main() {
     let active = subscriber.active.clone();
     ctrlc::set_handler(move || {
         active.store(false, Ordering::SeqCst);
-    }).expect("Error setting Ctrl-C handler");
+    })
+    .expect("Error setting Ctrl-C handler");
 
     subscriber
         .start(&known_block_ids, 0)
