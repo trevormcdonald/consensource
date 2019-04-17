@@ -80,3 +80,14 @@ The script also provides a `--no-build` option, which tells the script not to re
 ## Further information
 
 For further information on ConsenSource, including more details of the components, glossary and FAQs are available in the [ConsenSource Docs](https://pages.github.com/target/ConsenSource/)
+
+## Authors
+
+- [Adeeb Ahmed](https://github.com/adeebahmed)
+- [Darian Plumb](https://github.com/dplumb94)
+- [Eloa Franca Verona](https://github.com/eloaverona)
+- [Emmanuel Meinen](https://github.com/meinenec)
+- [Peter Schwarz](https://github.com/peterschwarz)
+- [Raphael Santo Domingo](https://github.com/pa3ng)
+- [Sean Quinn](https://github.com/sjqnn)
+- [Shannyn Telander](https://github.com/shannynalayna)
