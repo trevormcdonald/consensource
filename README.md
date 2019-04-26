@@ -84,6 +84,7 @@ For further information on ConsenSource, including more details of the component
 ## Authors
 
 - [Adeeb Ahmed](https://github.com/adeebahmed)
+- [Brijhette Farmer](https://github.com/astrohfiziks)
 - [Darian Plumb](https://github.com/dplumb94)
 - [Eloa Franca Verona](https://github.com/eloaverona)
 - [Emmanuel Meinen](https://github.com/meinenec)
