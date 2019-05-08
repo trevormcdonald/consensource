@@ -64,7 +64,8 @@ pub fn load_signing_key(name: Option<&str>) -> Result<Secp256k1PrivateKey, CliEr
             CliError::UserError(String::from(
                 "Could not load signing key: unable to determine home directory",
             ))
-        }).and_then(|mut p| {
+        })
+        .and_then(|mut p| {
             p.push(".sawtooth");
             p.push("keys");
             p.push(format!("{}.priv", &username));
@@ -89,7 +90,7 @@ pub fn load_signing_key(name: Option<&str>) -> Result<Secp256k1PrivateKey, CliEr
             return Err(CliError::UserError(format!(
                 "Empty key file: {}",
                 private_key_filename.display()
-            )))
+            )));
         }
     };
 

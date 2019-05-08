@@ -119,9 +119,9 @@ pub fn create_batch(txn: Transaction, signer: &Signer) -> Result<Batch, CliError
     let mut batch = Batch::new();
     let mut batch_header = BatchHeader::new();
 
-    batch_header.set_transaction_ids(protobuf::RepeatedField::from_vec(vec![
-        txn.header_signature.clone(),
-    ]));
+    batch_header.set_transaction_ids(protobuf::RepeatedField::from_vec(vec![txn
+        .header_signature
+        .clone()]));
     batch_header.set_signer_public_key(signer.get_public_key()?.as_hex());
     batch.set_transactions(protobuf::RepeatedField::from_vec(vec![txn]));
 

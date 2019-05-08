@@ -1083,7 +1083,8 @@ impl CertTransactionHandler {
                 accreditation.get_standard_id() == payload.get_standard_id()
                     && accreditation.get_standard_version()
                         == latest_standard_version.get_version().to_string()
-            }).is_some()
+            })
+            .is_some()
         {
             return Err(ApplyError::InvalidTransaction(format!(
                 "Accreditation for Standard {}, version {} already exists",

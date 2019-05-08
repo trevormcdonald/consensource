@@ -119,7 +119,7 @@ fn run_create_command<'a>(args: &ArgMatches<'a>) -> Result<(), CliError> {
                         .expect("Expected a transaction status, but was not found")
                         .message
                         .clone(),
-                ))
+                ));
             }
             // "PENDING" case where we should recheck
             _ => {

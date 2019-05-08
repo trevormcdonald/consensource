@@ -54,8 +54,10 @@ fn run_create_command<'a>(args: &ArgMatches<'a>) -> Result<(), CliError> {
                             "Invalid format for cert_data",
                         ))),
                     }
-                }).collect()
-        }).unwrap_or_else(|| Ok(vec![]));
+                })
+                .collect()
+        })
+        .unwrap_or_else(|| Ok(vec![]));
 
     let private_key = key::load_signing_key(key)?;
     let context = signing::create_context("secp256k1")?;
@@ -106,7 +108,7 @@ fn run_create_command<'a>(args: &ArgMatches<'a>) -> Result<(), CliError> {
                         .expect("Expected a transaction status, but was not found")
                         .message
                         .clone(),
-                ))
+                ));
             }
             // "PENDING" case where we should recheck
             _ => {

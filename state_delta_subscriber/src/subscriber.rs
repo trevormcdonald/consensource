@@ -70,7 +70,8 @@ impl Subscriber {
                 Message_MessageType::CLIENT_EVENTS_SUBSCRIBE_REQUEST,
                 &correlation_id,
                 &content,
-            ).map_err(|err| SubscriberError::ConnError(err.to_string()))?;
+            )
+            .map_err(|err| SubscriberError::ConnError(err.to_string()))?;
         let future_result = response_future
             .get()
             .map_err(|err| SubscriberError::ConnError(err.to_string()))?;
@@ -127,7 +128,8 @@ impl Subscriber {
                 Message_MessageType::CLIENT_EVENTS_UNSUBSCRIBE_REQUEST,
                 &correlation_id,
                 &content,
-            ).map_err(|err| SubscriberError::ConnError(err.to_string()))?;
+            )
+            .map_err(|err| SubscriberError::ConnError(err.to_string()))?;
         let future_result = response_future
             .get()
             .map_err(|err| SubscriberError::ConnError(err.to_string()))?;
