@@ -5,7 +5,7 @@ use diesel::prelude::*;
 use errors::ApiError;
 use hyper_sse::Server;
 use paging::*;
-use rocket_contrib::{Json, Value};
+use rocket_contrib::json::{Json, JsonValue};
 use std::{thread, time};
 
 const DEFAULT_CHANNEL: u8 = 0;
@@ -133,7 +133,7 @@ fn start_sse_server(host: &str, port: u16) -> thread::JoinHandle<()> {
 }
 
 #[get("/blocks/<block_id>")]
-pub fn fetch_block(block_id: String, conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn fetch_block(block_id: String, conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     fetch_block_with_head_param(block_id, Default::default(), conn)
 }
 
@@ -142,7 +142,7 @@ pub fn fetch_block_with_head_param(
     block_id: String,
     head_param: BlockParams,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let head_block_num: i64 = get_head_block_num(head_param.head, &conn)?;
 
     let block = blocks::table
@@ -174,12 +174,12 @@ pub struct BlockParams {
 }
 
 #[get("/blocks")]
-pub fn list_blocks(conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn list_blocks(conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     list_blocks_with_params(Default::default(), conn)
 }
 
 #[get("/blocks?<params>")]
-pub fn list_blocks_with_params(params: BlockParams, conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn list_blocks_with_params(params: BlockParams, conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     let head_block_num: i64 = get_head_block_num(params.head, &conn)?;
 
     let mut blocks_query = blocks::table
@@ -208,7 +208,7 @@ pub fn list_blocks_with_params(params: BlockParams, conn: DbConn) -> Result<Json
                     "paging": paging_info.get("paging") })))
 }
 
-fn apply_paging(params: BlockParams, head: i64, total_count: i64) -> Result<Json<Value>, ApiError> {
+fn apply_paging(params: BlockParams, head: i64, total_count: i64) -> Result<Json<JsonValue>, ApiError> {
     let link = format!("/api/blocks?head={}&", head);
 
     get_response_paging_info(

@@ -4,7 +4,7 @@ use database_manager::tables_schema::{standard_versions, standards};
 use diesel::prelude::*;
 use errors::ApiError;
 use paging::*;
-use rocket_contrib::{Json, Value};
+use rocket_contrib::json::{Json, JsonValue};
 use standards::ApiStandard;
 use std::collections::HashMap;
 
@@ -20,7 +20,7 @@ pub struct StandardBodyParams {
 pub fn list_standards_belonging_to_org(
     params: StandardBodyParams,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let head_block_num: i64 = get_head_block_num(params.head, &conn)?;
 
     let link_params = params.clone();
@@ -81,7 +81,7 @@ fn apply_paging(
     params: StandardBodyParams,
     head: i64,
     total_count: i64,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let mut link = String::from("/api/standards_body/standards?");
 
     link = format!(

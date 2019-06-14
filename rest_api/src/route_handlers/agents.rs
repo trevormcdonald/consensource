@@ -5,7 +5,7 @@ use database_manager::tables_schema::{agents, organizations};
 use diesel::prelude::*;
 use errors::ApiError;
 use paging::*;
-use rocket_contrib::{Json, Value};
+use rocket_contrib::json::{Json, JsonValue};
 use std::collections::HashMap;
 
 #[derive(Serialize)]
@@ -46,7 +46,7 @@ impl ApiAgent {
 }
 
 #[get("/agents/<public_key>")]
-pub fn fetch_agent(public_key: String, conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn fetch_agent(public_key: String, conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     fetch_agent_with_head_param(public_key, Default::default(), conn)
 }
 
@@ -55,7 +55,7 @@ pub fn fetch_agent_with_head_param(
     public_key: String,
     head_param: AgentParams,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let head_block_num: i64 = get_head_block_num(head_param.head, &conn)?;
 
     let agent = agents::table
@@ -102,12 +102,12 @@ pub struct AgentParams {
 }
 
 #[get("/agents")]
-pub fn list_agents(conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn list_agents(conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     list_agents_with_params(Default::default(), conn)
 }
 
 #[get("/agents?<params>")]
-pub fn list_agents_with_params(params: AgentParams, conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn list_agents_with_params(params: AgentParams, conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     let head_block_num: i64 = get_head_block_num(params.head, &conn)?;
 
     let mut agents_query = agents::table
@@ -160,7 +160,7 @@ pub fn list_agents_with_params(params: AgentParams, conn: DbConn) -> Result<Json
                     "paging": paging_info.get("paging") })))
 }
 
-fn apply_paging(params: AgentParams, head: i64, total_count: i64) -> Result<Json<Value>, ApiError> {
+fn apply_paging(params: AgentParams, head: i64, total_count: i64) -> Result<Json<JsonValue>, ApiError> {
     let link = format!("/api/agents?head={}&", head);
 
     get_response_paging_info(

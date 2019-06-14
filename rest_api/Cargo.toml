@@ -2,6 +2,7 @@
 name = "cert-registry-rest-api"
 version = "0.1.0"
 
+
 [dependencies]
 bcrypt = "0.2"
 clap = "2"
@@ -9,8 +10,7 @@ database = { path = "../database" }
 diesel = { version = "1.0.0", features = ["postgres", "r2d2"] }
 protobuf = "2"
 rocket = "0.4"
-rocket_codegen = "0.3"
-rocket_contrib = "0.3"
+rocket_contrib = "0.4"
 sawtooth-sdk = "0.1"
 serde = "1.0"
 serde_json = "1.0"

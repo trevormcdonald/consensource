@@ -4,7 +4,7 @@ use database_manager::tables_schema::{certificates, organizations, standards};
 use diesel::prelude::*;
 use errors::ApiError;
 use paging::*;
-use rocket_contrib::{Json, Value};
+use rocket_contrib::json::{Json, JsonValue};
 
 #[derive(Serialize)]
 pub struct ApiCertificate {
@@ -45,7 +45,7 @@ impl From<(Certificate, Organization, Standard, Organization)> for ApiCertificat
 }
 
 #[get("/certificates/<certificate_id>")]
-pub fn fetch_certificate(certificate_id: String, conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn fetch_certificate(certificate_id: String, conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     fetch_certificate_with_head_param(certificate_id, Default::default(), conn)
 }
 
@@ -54,7 +54,7 @@ pub fn fetch_certificate_with_head_param(
     certificate_id: String,
     head_param: CertificateParams,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let head_block_num: i64 = get_head_block_num(head_param.head, &conn)?;
     let result: Option<Result<(Certificate, Organization, Standard, Organization), ApiError>> =
         certificates::table
@@ -121,7 +121,7 @@ pub struct CertificateParams {
 }
 
 #[get("/certificates")]
-pub fn list_certificates(conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn list_certificates(conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     list_certificates_with_params(Default::default(), conn)
 }
 
@@ -129,7 +129,7 @@ pub fn list_certificates(conn: DbConn) -> Result<Json<Value>, ApiError> {
 pub fn list_certificates_with_params(
     params: CertificateParams,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let head_block_num: i64 = get_head_block_num(params.head, &conn)?;
 
     let mut certificate_query = certificates::table
@@ -226,7 +226,7 @@ fn apply_paging(
     params: CertificateParams,
     head: i64,
     total_count: i64,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let mut link = String::from("/api/certificates?");
 
     if let Some(certifying_body_id) = params.certifying_body_id {

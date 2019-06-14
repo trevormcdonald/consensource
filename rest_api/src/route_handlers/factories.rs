@@ -11,8 +11,8 @@ use database_manager::tables_schema::{
 use diesel::prelude::*;
 use errors::ApiError;
 use paging::*;
-use rocket::http::uri::URI;
-use rocket_contrib::{Json, Value};
+use rocket::http::uri::Uri;
+use rocket_contrib::json::{Json, JsonValue};
 use route_handlers::organizations::ApiFactory;
 
 #[derive(Default, FromForm, Clone)]
@@ -25,7 +25,7 @@ pub struct FactoryParams {
 }
 
 #[get("/factories/<organization_id>")]
-pub fn fetch_factory(organization_id: String, conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn fetch_factory(organization_id: String, conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     fetch_factory_with_head_param(organization_id, Default::default(), conn)
 }
 
@@ -34,7 +34,7 @@ pub fn fetch_factory_with_head_param(
     organization_id: String,
     params: FactoryParams,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let head_block_num: i64 = get_head_block_num(params.head, &conn)?;
 
     let factory = organizations::table
@@ -107,16 +107,16 @@ pub fn fetch_factory_with_head_param(
 }
 
 #[get("/factories")]
-pub fn list_factories(conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn list_factories(conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     query_factories(Default::default(), conn)
 }
 
 #[get("/factories?<params>")]
-pub fn list_factories_params(params: FactoryParams, conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn list_factories_params(params: FactoryParams, conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     query_factories(params, conn)
 }
 
-fn query_factories(params: FactoryParams, conn: DbConn) -> Result<Json<Value>, ApiError> {
+fn query_factories(params: FactoryParams, conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     let head_block_num: i64 = get_head_block_num(params.head, &conn)?;
 
     let mut factories_query = organizations::table
@@ -297,11 +297,11 @@ fn apply_paging(
     params: FactoryParams,
     head: i64,
     total_count: i64,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let mut link = String::from("/api/factories?");
 
     if let Some(name) = params.name {
-        link = format!("{}name={}&", link, URI::percent_encode(&name));
+        link = format!("{}name={}&", link, Uri::percent_encode(&name));
     }
     link = format!("{}head={}&", link, head);
 

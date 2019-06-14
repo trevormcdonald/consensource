@@ -8,8 +8,8 @@ use database_manager::tables_schema::{addresses, authorizations, contacts, organ
 use diesel::prelude::*;
 use errors::ApiError;
 use paging::*;
-use rocket::http::uri::URI;
-use rocket_contrib::{Json, Value};
+use rocket::http::uri::Uri;
+use rocket_contrib::json::{Json, JsonValue};
 use route_handlers::certificates::ApiCertificate;
 use std::collections::HashMap;
 
@@ -252,7 +252,7 @@ impl ApiStandardsBody {
 }
 
 #[get("/organizations/<organization_id>")]
-pub fn fetch_organization(organization_id: String, conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn fetch_organization(organization_id: String, conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     fetch_organization_with_params(organization_id, Default::default(), conn)
 }
 
@@ -261,7 +261,7 @@ pub fn fetch_organization_with_params(
     organization_id: String,
     head_param: OrganizationParams,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let head_block_num: i64 = get_head_block_num(head_param.head, &conn)?;
     let link = format!(
         "/api/organizations/{}?head={}",
@@ -343,7 +343,7 @@ pub struct OrganizationParams {
 }
 
 #[get("/organizations")]
-pub fn list_organizations(conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn list_organizations(conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     list_organizations_with_params(Default::default(), conn)
 }
 
@@ -351,7 +351,7 @@ pub fn list_organizations(conn: DbConn) -> Result<Json<Value>, ApiError> {
 pub fn list_organizations_with_params(
     params: OrganizationParams,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let head_block_num: i64 = get_head_block_num(params.head, &conn)?;
 
     let mut organizations_query = organizations::table
@@ -497,11 +497,11 @@ fn apply_paging(
     params: OrganizationParams,
     head: i64,
     total_count: i64,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let mut link = String::from("/api/organizations?");
 
     if let Some(name) = params.name {
-        link = format!("{}name={}&", link, URI::percent_encode(&name));
+        link = format!("{}name={}&", link, Uri::percent_encode(&name));
     }
     link = format!("{}head={}&", link, head);
 

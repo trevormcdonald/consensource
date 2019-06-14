@@ -1,5 +1,5 @@
 use bcrypt::{hash, verify, BcryptError, DEFAULT_COST};
-use rocket_contrib::{Json, Value};
+use rocket_contrib::json::{Json, JsonValue};
 
 use database::DbConn;
 use database_manager::models::User;
@@ -29,7 +29,7 @@ pub struct UserCreate {
 }
 
 #[post("/users", format = "application/json", data = "<payload>")]
-pub fn create_user(payload: Json<UserCreate>, conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn create_user(payload: Json<UserCreate>, conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     let user_create = payload.0;
     if find_user_by_username(&conn, &user_create.username)?.is_some() {
         Err(ApiError::BadRequest(
@@ -67,7 +67,7 @@ pub fn update_user(
     payload: Json<UserUpdate>,
     public_key: String,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let user_update = payload.0;
     let updated_auth = UserUpdate {
         username: user_update.username,
@@ -98,7 +98,7 @@ pub struct UserAuthenticate {
 pub fn authenticate(
     payload: Json<UserAuthenticate>,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let user_auth = payload.0;
     if let Some(user) = find_user_by_username(&conn, &user_auth.username)? {
         if verify(&user_auth.password, &user.hashed_password)? {

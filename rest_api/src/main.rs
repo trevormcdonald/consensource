@@ -1,6 +1,8 @@
+#![feature(custom_attribute)]
 #![feature(plugin)]
-#![feature(custom_derive)]
-#![plugin(rocket_codegen)]
+#![feature(proc_macro_hygiene)]
+#![feature(decl_macro)]
+// #![plugin(rocket_codegen)]
 // 'needless_pass_by_value' lint disabled due to an issue in Rocket
 // https://github.com/SergioBenitez/Rocket/issues/294
 #![cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
@@ -9,6 +11,7 @@
 extern crate clap;
 extern crate database as database_manager;
 extern crate diesel;
+#[macro_use]
 extern crate rocket;
 #[macro_use]
 extern crate rocket_contrib;
@@ -149,7 +152,7 @@ fn main() {
     let watcher_thread = blocks::WatcherThread::run(block_watcher, 250, &host, port + 1);
 
     let error = rocket::ignite()
-        .catch(catchers![
+        .register(catchers![
             errors::not_found,
             errors::service_unavailable,
             errors::internal_error

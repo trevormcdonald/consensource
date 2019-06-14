@@ -4,7 +4,7 @@ use database_manager::tables_schema::standards;
 use diesel::prelude::*;
 use errors::ApiError;
 use paging::get_head_block_num;
-use rocket_contrib::{Json, Value};
+use rocket_contrib::json::{Json, JsonValue};
 use std::collections::HashMap;
 
 #[derive(Default, FromForm, Clone)]
@@ -70,7 +70,7 @@ impl<'a> From<(&'a Standard, &'a Vec<StandardVersion>)> for ApiStandard {
 }
 
 #[get("/standards")]
-pub fn list_standards(conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn list_standards(conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     list_standards_with_params(Default::default(), conn)
 }
 
@@ -78,7 +78,7 @@ pub fn list_standards(conn: DbConn) -> Result<Json<Value>, ApiError> {
 pub fn list_standards_with_params(
     params: StandardParams,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let head_block_num: i64 = get_head_block_num(params.head, &conn)?;
     let mut standards_query = standards::table
         .filter(standards::start_block_num.le(head_block_num))

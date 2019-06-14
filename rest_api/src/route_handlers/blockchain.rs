@@ -3,7 +3,7 @@ use protobuf;
 use protobuf::ProtobufEnum;
 use rocket::Data;
 use rocket::State;
-use rocket_contrib::{Json, Value};
+use rocket_contrib::json::{Json, JsonValue};
 use sawtooth_sdk::messages::batch::BatchList;
 use sawtooth_sdk::messages::client_batch_submit::{
     ClientBatchStatus, ClientBatchStatusRequest, ClientBatchStatusResponse,
@@ -55,7 +55,7 @@ impl Serialize for BatchStatusWrapper {
 }
 
 #[post("/batches", format = "application/octet-stream", data = "<data>")]
-pub fn submit_batches(data: Data, validator_url: State<String>) -> Result<Json<Value>, ApiError> {
+pub fn submit_batches(data: Data, validator_url: State<String>) -> Result<Json<JsonValue>, ApiError> {
     let mut buffer = Vec::new();
     data.open().read_to_end(&mut buffer).unwrap();
     let batch_list: BatchList =
@@ -104,7 +104,7 @@ pub struct BatchStatusesParams {
 pub fn list_statuses(
     params: BatchStatusesParams,
     validator_url: State<String>,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let batch_ids: Vec<String> = params.id.split(',').map(|id| id.to_string()).collect();
 
     let mut batch_status_request = ClientBatchStatusRequest::new();

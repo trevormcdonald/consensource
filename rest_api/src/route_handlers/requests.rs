@@ -9,15 +9,14 @@ use database_manager::tables_schema::{
 use diesel::prelude::*;
 use errors::ApiError;
 use paging::*;
-use rocket::http::uri::URI;
-use rocket_contrib::{Json, Value};
+use rocket_contrib::json::{Json, JsonValue};
 use std::collections::HashMap;
 
 use route_handlers::organizations::ApiFactory;
 use route_handlers::standards::ApiStandard;
 
 #[get("/requests/<request_id>")]
-pub fn fetch_request(request_id: String, conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn fetch_request(request_id: String, conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     fetch_request_with_head_param(request_id, Default::default(), conn)
 }
 
@@ -26,7 +25,7 @@ pub fn fetch_request_with_head_param(
     request_id: String,
     head_param: CertRequestParams,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let head_block_num: i64 = get_head_block_num(head_param.head, &conn)?;
 
     let request = requests::table
@@ -125,12 +124,11 @@ impl ApiRequest {
                 id: req.factory_id.clone(),
                 link: format!(
                     "/api/organizations/{}",
-                    URI::percent_encode(&req.factory_id)
-                ),
+                    req.factory_id)
             },
             standard: StandardExpansion::Ref {
                 id: req.standard_id.clone(),
-                link: format!("/api/standards/{}", URI::percent_encode(&req.standard_id)),
+                link: format!("/api/standards/{}", req.standard_id),
             },
             status: req.status,
             request_date: req.request_date,
@@ -163,7 +161,7 @@ pub enum StandardExpansion {
 }
 
 #[get("/requests")]
-pub fn list_requests(conn: DbConn) -> Result<Json<Value>, ApiError> {
+pub fn list_requests(conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     query_requests(Default::default(), conn)
 }
 
@@ -171,11 +169,11 @@ pub fn list_requests(conn: DbConn) -> Result<Json<Value>, ApiError> {
 pub fn list_request_with_params(
     params: CertRequestParams,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     query_requests(params, conn)
 }
 
-fn query_requests(params: CertRequestParams, conn: DbConn) -> Result<Json<Value>, ApiError> {
+fn query_requests(params: CertRequestParams, conn: DbConn) -> Result<Json<JsonValue>, ApiError> {
     let head_block_num: i64 = get_head_block_num(params.head, &conn)?;
     let expand = params.expand.unwrap_or(false);
 
@@ -371,11 +369,11 @@ fn apply_paging(
     params: CertRequestParams,
     head: i64,
     total_count: i64,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<Json<JsonValue>, ApiError> {
     let mut link = String::from("/api/requests?");
 
     if let Some(factory_id) = params.factory_id {
-        link = format!("{}factory_id={}&", link, URI::percent_encode(&factory_id));
+        link = format!("{}factory_id={}&", link, factory_id);
     }
     if let Some(expand) = params.expand {
         link = format!("{}expand={}&", link, expand);
