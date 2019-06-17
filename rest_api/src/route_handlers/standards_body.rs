@@ -4,7 +4,8 @@ use database_manager::tables_schema::{standard_versions, standards};
 use diesel::prelude::*;
 use errors::ApiError;
 use paging::*;
-use rocket_contrib::{Json, Value};
+use rocket::request::Form;
+use rocket_contrib::json::JsonValue;
 use standards::ApiStandard;
 use std::collections::HashMap;
 
@@ -16,11 +17,15 @@ pub struct StandardBodyParams {
     head: Option<i64>,
 }
 
-#[get("/standards_body/standards?<params>")]
+#[get("/standards_body/standards?<params..>")]
 pub fn list_standards_belonging_to_org(
-    params: StandardBodyParams,
+    params: Option<Form<StandardBodyParams>>,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<JsonValue, ApiError> {
+    let params = match params {
+        Some(param) => param.into_inner(),
+        None => Default::default()
+    };
     let head_block_num: i64 = get_head_block_num(params.head, &conn)?;
 
     let link_params = params.clone();
@@ -63,7 +68,7 @@ pub fn list_standards_belonging_to_org(
             acc
         });
 
-    Ok(Json(json!({ "data": standards_results.into_iter()
+    Ok(json!({ "data": standards_results.into_iter()
                 .map(|standard| {
                      let standard_id = standard.standard_id.clone();
                      ApiStandard::from(
@@ -74,14 +79,14 @@ pub fn list_standards_belonging_to_org(
                          }).unwrap_or_else(|| vec![])))
                 }).collect::<Vec<_>>(),
                 "link": paging_info.get("link"),
-                "paging":paging_info.get("paging")})))
+                "paging":paging_info.get("paging")}))
 }
 
 fn apply_paging(
     params: StandardBodyParams,
     head: i64,
     total_count: i64,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<JsonValue, ApiError> {
     let mut link = String::from("/api/standards_body/standards?");
 
     link = format!(
