@@ -9,24 +9,29 @@ use database_manager::tables_schema::{
 use diesel::prelude::*;
 use errors::ApiError;
 use paging::*;
-use rocket::http::uri::URI;
-use rocket_contrib::{Json, Value};
+use rocket::request::Form;
+use rocket::http::uri::Uri;
+use rocket_contrib::json::JsonValue;
 use std::collections::HashMap;
 
 use route_handlers::organizations::ApiFactory;
 use route_handlers::standards::ApiStandard;
 
 #[get("/requests/<request_id>")]
-pub fn fetch_request(request_id: String, conn: DbConn) -> Result<Json<Value>, ApiError> {
-    fetch_request_with_head_param(request_id, Default::default(), conn)
+pub fn fetch_request(request_id: String, conn: DbConn) -> Result<JsonValue, ApiError> {
+    fetch_request_with_head_param(request_id, None, conn)
 }
 
-#[get("/requests/<request_id>?<head_param>")]
+#[get("/requests/<request_id>?<head_param..>")]
 pub fn fetch_request_with_head_param(
     request_id: String,
-    head_param: CertRequestParams,
+    head_param: Option<Form<CertRequestParams>>,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<JsonValue, ApiError> {
+    let head_param = match head_param {
+        Some(param) => param.into_inner(),
+        None => Default::default()
+    };
     let head_block_num: i64 = get_head_block_num(head_param.head, &conn)?;
 
     let request = requests::table
@@ -79,17 +84,17 @@ pub fn fetch_request_with_head_param(
                         .expect("Error getting standard versions"),
                 ));
 
-                Ok(Json(json!({
+                Ok(json!({
                     "data": ApiRequest::with_expansion(request, factory, standard),
                     "link": link,
                     "head": head_block_num,
-                })))
+                }))
             } else {
-                Ok(Json(json!({
+                Ok(json!({
                     "data": ApiRequest::from(request),
                     "link": link,
                     "head": head_block_num,
-                })))
+                }))
             }
         }
         None => Err(ApiError::NotFound(format!(
@@ -125,12 +130,12 @@ impl ApiRequest {
                 id: req.factory_id.clone(),
                 link: format!(
                     "/api/organizations/{}",
-                    URI::percent_encode(&req.factory_id)
+                    Uri::percent_encode(&req.factory_id)
                 ),
             },
             standard: StandardExpansion::Ref {
                 id: req.standard_id.clone(),
-                link: format!("/api/standards/{}", URI::percent_encode(&req.standard_id)),
+                link: format!("/api/standards/{}", Uri::percent_encode(&req.standard_id)),
             },
             status: req.status,
             request_date: req.request_date,
@@ -163,19 +168,24 @@ pub enum StandardExpansion {
 }
 
 #[get("/requests")]
-pub fn list_requests(conn: DbConn) -> Result<Json<Value>, ApiError> {
-    query_requests(Default::default(), conn)
+pub fn list_requests(conn: DbConn) -> Result<JsonValue, ApiError> {
+    query_requests(None, conn)
 }
 
-#[get("/requests?<params>")]
+#[get("/requests?<params..>")]
 pub fn list_request_with_params(
-    params: CertRequestParams,
+    params: Option<Form<CertRequestParams>>,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<JsonValue, ApiError> {
+
     query_requests(params, conn)
 }
 
-fn query_requests(params: CertRequestParams, conn: DbConn) -> Result<Json<Value>, ApiError> {
+fn query_requests(params: Option<Form<CertRequestParams>>, conn: DbConn) -> Result<JsonValue, ApiError> {
+    let params = match params {
+        Some(param) => param.into_inner(),
+        None => Default::default()
+    };
     let head_block_num: i64 = get_head_block_num(params.head, &conn)?;
     let expand = params.expand.unwrap_or(false);
 
@@ -228,7 +238,7 @@ fn query_requests(params: CertRequestParams, conn: DbConn) -> Result<Json<Value>
             standard_version_results,
         ) = fetch_expansions(&conn, &factory_ids, &standard_ids, head_block_num)?;
 
-        Ok(Json(json!({
+        Ok(json!({
             "data": request_results.into_iter()
                 .map(|request| {
                     let factory_id = request.factory_id.clone();
@@ -247,15 +257,15 @@ fn query_requests(params: CertRequestParams, conn: DbConn) -> Result<Json<Value>
             "link": paging_info.get("link"),
             "head": head_block_num,
             "paging":paging_info.get("paging")
-        })))
+        }))
     } else {
-        Ok(Json(json!({
+        Ok(json!({
             "data": request_results.into_iter()
                 .map(ApiRequest::from).collect::<Vec<_>>(),
             "link": paging_info.get("link"),
             "head": head_block_num,
             "paging":paging_info.get("paging")
-        })))
+        }))
     }
 }
 
@@ -371,11 +381,11 @@ fn apply_paging(
     params: CertRequestParams,
     head: i64,
     total_count: i64,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<JsonValue, ApiError> {
     let mut link = String::from("/api/requests?");
 
     if let Some(factory_id) = params.factory_id {
-        link = format!("{}factory_id={}&", link, URI::percent_encode(&factory_id));
+        link = format!("{}factory_id={}&", link, Uri::percent_encode(&factory_id));
     }
     if let Some(expand) = params.expand {
         link = format!("{}expand={}&", link, expand);
