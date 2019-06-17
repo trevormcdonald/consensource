@@ -8,8 +8,9 @@ use database_manager::tables_schema::{addresses, authorizations, contacts, organ
 use diesel::prelude::*;
 use errors::ApiError;
 use paging::*;
-use rocket::http::uri::URI;
-use rocket_contrib::{Json, Value};
+use rocket::request::Form;
+use rocket::http::uri::Uri;
+use rocket_contrib::json::JsonValue;
 use route_handlers::certificates::ApiCertificate;
 use std::collections::HashMap;
 
@@ -252,16 +253,20 @@ impl ApiStandardsBody {
 }
 
 #[get("/organizations/<organization_id>")]
-pub fn fetch_organization(organization_id: String, conn: DbConn) -> Result<Json<Value>, ApiError> {
-    fetch_organization_with_params(organization_id, Default::default(), conn)
+pub fn fetch_organization(organization_id: String, conn: DbConn) -> Result<JsonValue, ApiError> {
+    fetch_organization_with_params(organization_id, None, conn)
 }
 
-#[get("/organizations/<organization_id>?<head_param>")]
+#[get("/organizations/<organization_id>?<head_param..>")]
 pub fn fetch_organization_with_params(
     organization_id: String,
-    head_param: OrganizationParams,
+    head_param: Option<Form<OrganizationParams>>,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<JsonValue, ApiError> {
+    let head_param = match head_param {
+        Some(param) => param.into_inner(),
+        None => Default::default()
+    };
     let head_block_num: i64 = get_head_block_num(head_param.head, &conn)?;
     let link = format!(
         "/api/organizations/{}?head={}",
@@ -322,9 +327,9 @@ pub fn fetch_organization_with_params(
                 OrganizationTypeEnum::UnsetType => json!({}),
             };
 
-            Ok(Json(json!({ "data": data,
+            Ok(json!({ "data": data,
                             "link": link,
-                            "head": head_block_num,})))
+                            "head": head_block_num,}))
         }
         None => Err(ApiError::NotFound(format!(
             "No organization with the organization ID {} exists",
@@ -343,15 +348,19 @@ pub struct OrganizationParams {
 }
 
 #[get("/organizations")]
-pub fn list_organizations(conn: DbConn) -> Result<Json<Value>, ApiError> {
-    list_organizations_with_params(Default::default(), conn)
+pub fn list_organizations(conn: DbConn) -> Result<JsonValue, ApiError> {
+    list_organizations_with_params(None, conn)
 }
 
-#[get("/organizations?<params>")]
+#[get("/organizations?<params..>")]
 pub fn list_organizations_with_params(
-    params: OrganizationParams,
+    params: Option<Form<OrganizationParams>>,
     conn: DbConn,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<JsonValue, ApiError> {
+    let params = match params {
+        Some(param) => param.into_inner(),
+        None => Default::default()
+    };
     let head_block_num: i64 = get_head_block_num(params.head, &conn)?;
 
     let mut organizations_query = organizations::table
@@ -457,7 +466,7 @@ pub fn list_organizations_with_params(
             acc
         });
 
-    Ok(Json(json!({
+    Ok(json!({
         "data": organization_results.into_iter()
             .map(|org| {
                 let org_id = org.organization_id.clone();
@@ -490,18 +499,18 @@ pub fn list_organizations_with_params(
         "link": paging_info.get("link"),
         "head": head_block_num,
         "paging": paging_info.get("paging")
-    })))
+    }))
 }
 
 fn apply_paging(
     params: OrganizationParams,
     head: i64,
     total_count: i64,
-) -> Result<Json<Value>, ApiError> {
+) -> Result<JsonValue, ApiError> {
     let mut link = String::from("/api/organizations?");
 
     if let Some(name) = params.name {
-        link = format!("{}name={}&", link, URI::percent_encode(&name));
+        link = format!("{}name={}&", link, Uri::percent_encode(&name));
     }
     link = format!("{}head={}&", link, head);
 
