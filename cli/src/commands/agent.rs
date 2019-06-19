@@ -100,7 +100,7 @@ fn agent_status_handler(url: &str, batch_list: &BatchList) -> Result<(), CliErro
                         .expect("Expected a transaction status, but was not found")
                         .message
                         .clone(),
-                ))
+                ));
             }
             // "PENDING" case where we should recheck
             _ => {
@@ -133,7 +133,8 @@ fn authorize_agent_payload(pub_key: &str, role: &str) -> CertificateRegistryPayl
         x => Err(CliError::UserError(format!(
             "Unexpected invalid role {:?}",
             x
-        ))).unwrap(),
+        )))
+        .unwrap(),
     }
 
     let mut payload = CertificateRegistryPayload::new();

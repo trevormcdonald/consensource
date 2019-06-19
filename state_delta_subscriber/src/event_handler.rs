@@ -70,7 +70,8 @@ impl EventHandler {
                         .map_err(|err| SubscriberError::EventParseError(err.to_string()))?,
                     block_id: block_id[0].get_value().to_string(),
                 })
-            }).last()
+            })
+            .last()
             .unwrap_or_else(|| {
                 Err(SubscriberError::EventParseError(
                     "No block event found".to_string(),
@@ -92,7 +93,8 @@ impl EventHandler {
                     .take_state_changes()
                     .into_iter()
                     .filter(|state_change| (namespace_regex.is_match(state_change.get_address())))
-            }).collect())
+            })
+            .collect())
     }
 
     fn get_namespace_regex(&self) -> Regex {
@@ -213,7 +215,8 @@ impl FromStateAtBlock<organization::Organization>
                         valid_to: accreditation.get_valid_to() as i64,
                         start_block_num: block_num,
                         end_block_num: MAX_BLOCK_NUM,
-                    }).collect();
+                    })
+                    .collect();
                 Some(accreditations)
             }
             _ => None,
@@ -235,7 +238,8 @@ impl FromStateAtBlock<organization::Organization>
                 },
                 start_block_num: block_num,
                 end_block_num: MAX_BLOCK_NUM,
-            }).collect();
+            })
+            .collect();
         let new_contacts = org
             .contacts
             .iter()
@@ -246,7 +250,8 @@ impl FromStateAtBlock<organization::Organization>
                 language_code: contact.get_language_code().to_string(),
                 start_block_num: block_num,
                 end_block_num: MAX_BLOCK_NUM,
-            }).collect();
+            })
+            .collect();
         let new_address = match org.get_organization_type() {
             organization::Organization_Type::FACTORY => {
                 let address = org
@@ -365,7 +370,8 @@ impl FromStateAtBlock<standard::Standard> for (NewStandard, Vec<NewStandardVersi
                 approval_date: version.approval_date as i64,
                 start_block_num: block_num,
                 end_block_num: MAX_BLOCK_NUM,
-            }).collect();
+            })
+            .collect();
 
         (db_standard, db_versions)
     }
