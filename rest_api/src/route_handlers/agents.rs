@@ -48,7 +48,6 @@ impl ApiAgent {
 
 #[get("/agents/<public_key>")]
 pub fn fetch_agent(public_key: String, conn: DbConn) -> Result<JsonValue, ApiError> {
-    //let options : AgentParams = Default::default();
     fetch_agent_with_head_param(public_key, None, conn)
 }
 
@@ -109,7 +108,6 @@ pub struct AgentParams {
 
 #[get("/agents")]
 pub fn list_agents(conn: DbConn) -> Result<JsonValue, ApiError> {
-    //let options : AgentParams = Default::default();
     list_agents_with_params(None, conn)
 }
 
